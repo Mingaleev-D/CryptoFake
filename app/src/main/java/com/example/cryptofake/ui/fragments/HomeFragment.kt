@@ -5,13 +5,18 @@ import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
+import androidx.viewpager2.widget.ViewPager2.VISIBLE
 import com.example.cryptofake.R
 import com.example.cryptofake.data.remote.ApiInterface
 import com.example.cryptofake.data.remote.ApiUtilies
 import com.example.cryptofake.databinding.FragmentHomeBinding
+import com.example.cryptofake.ui.adapter.TopLossGainPagerAdapter
 import com.example.cryptofake.ui.adapter.TopMarketAdapter
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,6 +39,37 @@ class HomeFragment : Fragment() {
 
       getTopCurrencyList()
 
+      setTabLayout()
+   }
+   private fun setTabLayout() {
+      val adapter = TopLossGainPagerAdapter(this)
+      binding.apply {
+         contentViewPager.adapter = adapter
+         contentViewPager.registerOnPageChangeCallback(object : OnPageChangeCallback(){
+            override fun onPageSelected(position: Int) {
+               super.onPageSelected(position)
+               if(position == 0){
+                  binding.apply {
+                     topGainIndicator.visibility = VISIBLE
+                     topLoseIndicator.visibility = GONE
+                  }
+               }else{
+                  binding.apply {
+                     topGainIndicator.visibility = GONE
+                     topLoseIndicator.visibility = VISIBLE
+                  }
+               }
+            }
+         })
+      }
+      TabLayoutMediator(binding.tabLayout, binding.contentViewPager){ tab, position ->
+         var title = if(position == 0){
+            "Top Gainers"
+         }else{
+            "Top Losers"
+         }
+         tab.text = title
+      }.attach()
    }
 
    private fun getTopCurrencyList() {
